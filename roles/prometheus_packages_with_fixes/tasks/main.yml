@@ -1,0 +1,55 @@
+---
+
+# -----------------------------------------------------------------------------
+# dependencies
+# -----------------------------------------------------------------------------
+
+- name: preflight tasks
+  ansible.builtin.import_tasks: preflight.yml
+
+# -----------------------------------------------------------------------------
+# dependencies
+# -----------------------------------------------------------------------------
+
+- name: install arch-audit
+  community.general.pacman:
+    name:
+      - arch-audit
+  when:
+    - ansible_facts.os_family == 'Archlinux'
+
+# -----------------------------------------------------------------------------
+# the timer
+# -----------------------------------------------------------------------------
+
+- name: install the timer
+  ansible.builtin.include_role:
+    name: idiv_biodiversity.systemd.systemd_timer
+    apply:
+      tags:
+        - prometheus-packages-with-fixes-timer
+  vars:
+    systemd_timer_name: prometheus-packages-with-fixes
+    systemd_timer_scripts:
+      - src: 'script-{{ ansible_facts.pkg_mgr }}.sh'
+        dest: /usr/bin/prometheus-packages-with-fixes
+    systemd_timer_user: >-
+      {{
+        prometheus_packages_with_fixes_user | default("root")
+      }}
+    systemd_timer_group: >-
+      {{
+        prometheus_packages_with_fixes_group | default("root")
+      }}
+    systemd_timer_on_calendar: >-
+      {{
+        prometheus_packages_with_fixes_on_calendar | default("hourly")
+      }}
+    systemd_timer_on_startup_sec: >-
+      {{
+        prometheus_packages_with_fixes_on_startup_sec | default("0")
+      }}
+  tags:
+    - prometheus-packages-with-fixes-timer
+
+...

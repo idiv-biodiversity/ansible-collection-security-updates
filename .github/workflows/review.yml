@@ -1,0 +1,78 @@
+---
+
+name: review
+
+on: [pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      -
+        uses: reviewdog/action-actionlint@ae857e78c1b42b3d0a49637181b09d3d56d402b4 # v1.84.1
+
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      -
+        uses: reviewdog/action-yamllint@020fba38ce9fed550c704d933aeeb7d6360f7d47 # v1.26.0
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          yamllint_flags: '.'
+
+  ansible-lint:
+    name: ansible-lint
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      -
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: 3.x
+      -
+        uses: reviewdog/action-ansiblelint@931601fec9976c70b82ee83fd815df9f4d97c179 # v1.21.0
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      -
+        uses: reviewdog/action-shellcheck@950c9d71535c8c49e5c029c33a438ade63b9009c # v1.35.1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          fail_level: warning
+
+...

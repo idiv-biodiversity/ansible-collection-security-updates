@@ -1,0 +1,94 @@
+---
+
+- name: verify
+  hosts: all
+  tasks:
+
+    # -------------------------------------------------------------------------
+    # check service
+    # -------------------------------------------------------------------------
+
+    - name: check service
+      ansible.builtin.service:
+        name: prometheus-packages-with-fixes.service
+        enabled: yes
+      check_mode: yes
+      register: __systemd_timer_service
+
+    - name: debug service
+      ansible.builtin.debug:
+        var: __systemd_timer_service
+
+    - name: assert on service
+      ansible.builtin.assert:
+        that:
+          - not __systemd_timer_service.failed
+          - not __systemd_timer_service.changed
+          - __systemd_timer_service.enabled
+        success_msg: 'service is configured'
+
+    # -------------------------------------------------------------------------
+    # check timer
+    # -------------------------------------------------------------------------
+
+    - name: check timer
+      ansible.builtin.service:
+        name: prometheus-packages-with-fixes.timer
+        enabled: yes
+      check_mode: yes
+      register: __systemd_timer_timer
+
+    - name: debug timer
+      ansible.builtin.debug:
+        var: __systemd_timer_timer
+
+    - name: assert on timer
+      ansible.builtin.assert:
+        that:
+          - not __systemd_timer_timer.failed
+          - not __systemd_timer_timer.changed
+          - __systemd_timer_timer.enabled
+        success_msg: 'timer is configured'
+
+    # -------------------------------------------------------------------------
+    # check commands
+    # -------------------------------------------------------------------------
+
+    - name: fetch log
+      ansible.builtin.command: >-
+        journalctl -xeu prometheus-packages-with-fixes.service
+      changed_when: no
+      register: __systemd_service_log
+
+    - name: show log
+      ansible.builtin.debug:
+        var: __systemd_service_log
+
+    - name: fetch timer output
+      ansible.builtin.slurp:
+        src: /tmp/security-updates.prom
+      register: __systemd_timer_output
+
+    - name: show timer output
+      ansible.builtin.debug:
+        var: __systemd_timer_output
+
+    - name: set output content
+      ansible.builtin.set_fact:
+        __systemd_timer_output_content: >-
+          {{ __systemd_timer_output.content | b64decode }}
+
+    - name: show timer output
+      ansible.builtin.debug:
+        var: __systemd_timer_output_content
+
+    - name: assert on timer output
+      ansible.builtin.assert:
+        that:
+          - >-
+            'node_packages_with_security_fixes'
+            in
+            __systemd_timer_output_content
+        success_msg: 'metrics were written'
+
+...

@@ -1,0 +1,29 @@
+---
+
+namespace: idiv_biodiversity
+name: security_updates
+version: 0.1.0
+readme: README.md
+authors:
+  - Christian Krause <christian.krause@idiv.de>
+description: security updates
+license_file: LICENSE
+tags:
+  - security
+  - updates
+dependencies:
+  "idiv_biodiversity.systemd": ">=0.3.0"
+  "community.general": ">=13"
+repository: https://github.com/idiv-biodiversity/ansible-collection-security-updates
+documentation: https://github.com/idiv-biodiversity/ansible-collection-security-updates
+homepage: https://github.com/idiv-biodiversity/ansible-collection-security-updates
+issues: https://github.com/idiv-biodiversity/ansible-collection-security-updates/issues
+build_ignore:
+  - .ansible
+  - .config
+  - .github
+  - .gitignore
+  - .yamllint
+  - roles/*/molecule
+
+...

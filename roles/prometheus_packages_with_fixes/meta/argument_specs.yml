@@ -1,0 +1,19 @@
+---
+
+argument_specs:
+  main:
+    options:
+
+      prometheus_packages_with_fixes_group:
+        type: str
+
+      prometheus_packages_with_fixes_on_calendar:
+        type: str
+
+      prometheus_packages_with_fixes_on_startup_sec:
+        type: str
+
+      prometheus_packages_with_fixes_user:
+        type: str
+
+...

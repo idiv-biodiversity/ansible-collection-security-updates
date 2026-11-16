@@ -1,0 +1,10 @@
+---
+
+- name: assert that external vars are set
+  ansible.builtin.assert:
+    that:
+      - node_exporter_system_group is defined
+      - node_exporter_system_user is defined
+      - node_exporter_textfile_dir is defined
+
+...

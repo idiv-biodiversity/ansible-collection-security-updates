@@ -1,0 +1,82 @@
+---
+
+name: molecule-prometheus-packages-with-fixes
+
+on:
+  pull_request:
+    paths:
+      - .config/molecule/**
+      - .github/workflows/molecule-prometheus-packages-with-fixes.yml
+      - roles/prometheus_packages_with_fixes/**
+  push:
+    branches:
+      - main
+      - wip/next
+    paths:
+      - .config/molecule/**
+      - .github/workflows/molecule-prometheus-packages-with-fixes.yml
+      - roles/prometheus_packages_with_fixes/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+
+  molecule:
+    name: molecule
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - name: archlinux
+            ansible: '2.22'
+            python: '>=3.13 <3.16'
+          - name: rockylinux-9
+            ansible: '2.22'
+            python: '>=3.13 <3.16'
+          - name: rockylinux-10
+            ansible: '2.22'
+            python: '>=3.13 <3.16'
+        scenario:
+          - default
+
+    steps:
+      -
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      -
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.distro.python }}
+      -
+        run: >-
+          pip3 install
+          ansible-core~=${__MATRIX_ANSIBLE_VERSION}
+          docker
+          molecule
+          molecule-plugins[docker]
+        env:
+          __MATRIX_ANSIBLE_VERSION: ${{ matrix.distro.ansible }}.0
+      -
+        run: ansible --version
+      -
+        run: molecule --version
+      -
+        run: >-
+          molecule test
+          -p ${__MATRIX_DISTRO_NAME}
+          -s ${__MATRIX_SCENARIO}
+        working-directory: ./roles/prometheus_packages_with_fixes
+        env:
+          __MATRIX_DISTRO_NAME: ${{ matrix.distro.name }}
+          __MATRIX_SCENARIO: ${{ matrix.scenario }}
+          ANSIBLE_DIFF_ALWAYS: 'True'
+          PY_COLORS: '1'
+
+...
