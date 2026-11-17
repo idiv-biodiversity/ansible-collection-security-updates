@@ -38,6 +38,12 @@ prometheus_packages_with_fixes_on_calendar: hourly
 prometheus_packages_with_fixes_on_startup_sec: 0
 ```
 
+What to exclude (only works with `dnf` at the moment):
+
+```
+prometheus_packages_with_fixes_exclude: 'kernel*'
+```
+
 
 Dependencies
 ------------

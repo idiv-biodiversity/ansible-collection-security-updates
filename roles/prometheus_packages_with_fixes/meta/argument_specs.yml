@@ -4,6 +4,9 @@ argument_specs:
   main:
     options:
 
+      prometheus_packages_with_fixes_exclude:
+        type: str
+
       prometheus_packages_with_fixes_group:
         type: str
 

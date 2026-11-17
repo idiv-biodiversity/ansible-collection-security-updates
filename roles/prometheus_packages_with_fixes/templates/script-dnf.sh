@@ -28,8 +28,13 @@ trap 'cleanup' EXIT INT TERM
 # app
 # -----------------------------------------------------------------------------
 
+{% if prometheus_packages_with_fixes_exclude is defined and
+      prometheus_packages_with_fixes_exclude %}
+excludes='{{ prometheus_packages_with_fixes_exclude }}'
+{% endif %}
+
 packages=$(
-  dnf updateinfo list security |
+  dnf updateinfo list security ${excludes:+--exclude "$excludes"} |
     awk '$1 ~ /^R[HL]SA/ { sum += 1 } BEGIN { sum = 0 } END { print sum }'
 ) &&
   cat << EOF > "$tmp" && mv "$tmp" "$metric_file"
